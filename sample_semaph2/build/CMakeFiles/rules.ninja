@@ -1666,7 +1666,7 @@ rule C_STATIC_LIBRARY_LINKER____idf_main_
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = C:\Users\ufop\.espressif\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SC:\PCC113\sample_semaph2 -BC:\PCC113\sample_semaph2\build
+  command = C:\Users\ufop\.espressif\tools\cmake\3.24.0\bin\cmake.exe --regenerate-during-build -SC:\PCC113\PCC113\sample_semaph2 -BC:\PCC113\PCC113\sample_semaph2\build
   description = Re-running CMake...
   generator = 1
 

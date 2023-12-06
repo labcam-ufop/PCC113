@@ -1,4 +1,4 @@
-# Install script for directory: C:/PCC113/sample_semaph2/main
+# Install script for directory: C:/PCC113/PCC113/sample_semaph2/main
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)

@@ -1,66 +1,77 @@
 #include <stdio.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "freertos/semphr.h" // Include the semaphore header
+#include "freertos/semphr.h"
 
-SemaphoreHandle_t xRecursiveMutex; // Declare a recursive mutex handle
+// Declare a mutex handle
+SemaphoreHandle_t xMutex;
 
 void tarefa1(void *param);
+void tarefa2(void *param);
 
-void app_main(void)
-{
-    // Create a recursive mutex
-    xRecursiveMutex = xSemaphoreCreateRecursiveMutex();
+void app_main(void) {
+    // Create a mutex
+    xMutex = xSemaphoreCreateMutex();
 
-    if (xRecursiveMutex != NULL)
-    {
-        // Create the task
-        xTaskCreate(&tarefa1, "Tarefa1", 2048, NULL, 1, NULL);
-
-        // Create the interrupt (simulated in this example)
-        const TickType_t xDelay500ms = pdMS_TO_TICKS(500UL);
-        for (;;)
-        {
-            vTaskDelay(xDelay500ms);
-            printf("Interrupt simulation - About to give the recursive mutex.\n");
-
-            // Give the recursive mutex from the interrupt
-            xSemaphoreGiveRecursive(xRecursiveMutex);
-
-            printf("Interrupt simulation - Recursive mutex given.\n\n\n");
-        }
-    }
-    else
-    {
-        printf("Failed to create recursive mutex.\n");
+    if (xMutex != NULL) {
+        // Create the tasks
+        xTaskCreate(&tarefa1, "Tarefa1", 2048, NULL, 1, NULL); // Lower priority
+        xTaskCreate(&tarefa2, "Tarefa2", 2048, NULL, 2, NULL); // Higher priority
+    } else {
+        printf("Failed to create mutex.\n");
     }
 }
 
-void tarefa1(void *param)
-{
+void tarefa1(void *param) {
     (void)param;
 
-    while (1)
-    {
-        printf("tarefa1 starts - Waiting for recursive mutex...\n");
+    while (1) {
+        printf("Tarefa1 starts - Waiting for mutex...\n");
 
-        // Take the recursive mutex
-        if (xSemaphoreTakeRecursive(xRecursiveMutex, portMAX_DELAY) == pdPASS)
-        {
-            // Task is unblocked when the recursive mutex is taken
-            printf("tarefa1: Got the recursive mutex! Processing...\n");
+        // Take the mutex
+        if (xSemaphoreTake(xMutex, portMAX_DELAY) == pdPASS) {
+            // Task is unblocked when the mutex is taken
+            printf("Tarefa1: Got the mutex! Processing...\n");
 
             // Simulate some processing
             vTaskDelay(1000 / portTICK_PERIOD_MS);
 
-            printf("tarefa1: Processing complete. Releasing recursive mutex.\n");
+            printf("Tarefa1: Processing complete. Releasing mutex.\n");
 
-            // Release the recursive mutex to allow the next synchronization
-            xSemaphoreGiveRecursive(xRecursiveMutex);
+            // Release the mutex to allow the next synchronization
+            xSemaphoreGive(xMutex);
+        } else {
+            printf("Failed to take mutex.\n");
         }
-        else
-        {
-            printf("Failed to take recursive mutex.\n");
+
+        // Simulate some delay before trying to take the mutex again
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
+}
+
+void tarefa2(void *param) {
+    (void)param;
+
+    while (1) {
+        printf("Tarefa2 starts - Waiting for mutex...\n");
+
+        // Take the mutex
+        if (xSemaphoreTake(xMutex, portMAX_DELAY) == pdPASS) {
+            // Task is unblocked when the mutex is taken
+            printf("Tarefa2: Got the mutex! Processing...\n");
+
+            // Simulate some processing
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+
+            printf("Tarefa2: Processing complete. Releasing mutex.\n");
+
+            // Release the mutex to allow the next synchronization
+            xSemaphoreGive(xMutex);
+        } else {
+            printf("Failed to take mutex.\n");
         }
+
+        // Simulate some delay before trying to take the mutex again
+        vTaskDelay(500 / portTICK_PERIOD_MS);
     }
 }

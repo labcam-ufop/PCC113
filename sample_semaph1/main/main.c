@@ -3,47 +3,78 @@
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 
-#define SEMAPHORE_SYNC (1)
+// Declare a binary semaphore handle
+SemaphoreHandle_t xBinarySemaphore;
 
-// Variável compartilhada
-volatile int sharedVariable = 0;
+void tarefa1(void *param);
+void tarefa2(void *param);
 
-// Handler do semáforo
-SemaphoreHandle_t xSemaphore;
+void app_main(void) {
+    // Create a binary semaphore
+    xBinarySemaphore = xSemaphoreCreateBinary();
 
-// Task 1
-void task1(void *pvParameters) {
-while(1) {
-if(xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE) {
-sharedVariable++; // Acessando a variável compartilhada
-printf("Task 1 incrementa = %d\n", sharedVariable);
-xSemaphoreGive(xSemaphore); // Liberando o semáforo
-}
-vTaskDelay(1000 / portTICK_PERIOD_MS); // Delay de 1 segundo
-}
-}
+    if (xBinarySemaphore != NULL) {
+        // Give the semaphore initially to simulate the resource being available
+        xSemaphoreGive(xBinarySemaphore);
 
-// Task 2
-void task2(void *pvParameters) {
-while(1) {
-if(xSemaphoreTake(xSemaphore, portMAX_DELAY) == pdTRUE) {
-sharedVariable--; // Acessando a variável compartilhada
-printf("Task 2 decrementa = %d\n", sharedVariable);
-xSemaphoreGive(xSemaphore); // Liberando o semáforo
-}
-vTaskDelay(1500 / portTICK_PERIOD_MS); // Delay de 1.5 segundos
-}
+        // Create the tasks
+        xTaskCreate(&tarefa1, "Tarefa1", 2048, NULL, 1, NULL); // Lower priority
+        xTaskCreate(&tarefa2, "Tarefa2", 2048, NULL, 2, NULL); // Higher priority
+    } else {
+        printf("Failed to create binary semaphore.\n");
+    }
 }
 
-void app_main() {
-// Criação do semáforo binário
-xSemaphore = xSemaphoreCreateBinary();
-if(xSemaphore != NULL) {
-// Inicialização das tasks
-xTaskCreate(&task1, "Task 1", 2048, NULL, 5, NULL);
-xTaskCreate(&task2, "Task 2", 2048, NULL, 5, NULL);
+void tarefa1(void *param) {
+    (void)param;
+
+    while (1) {
+        printf("Tarefa1 starts - Waiting for binary semaphore...\n");
+
+        // Take the binary semaphore
+        if (xSemaphoreTake(xBinarySemaphore, portMAX_DELAY) == pdPASS) {
+            // Task is unblocked when the semaphore is taken
+            printf("Tarefa1: Got the binary semaphore! Processing...\n");
+
+            // Simulate some processing
+            vTaskDelay(1000 / portTICK_PERIOD_MS);
+
+            printf("Tarefa1: Processing complete. Releasing binary semaphore.\n");
+
+            // Release the binary semaphore to allow the next synchronization
+            xSemaphoreGive(xBinarySemaphore);
+        } else {
+            printf("Failed to take binary semaphore.\n");
+        }
+
+        // Simulate some delay before trying to take the semaphore again
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
 }
 
-// Inicia o semáforo (liberando para a Task 1)
-xSemaphoreGive(xSemaphore);
+void tarefa2(void *param) {
+    (void)param;
+
+    while (1) {
+        printf("Tarefa2 starts - Waiting for binary semaphore...\n");
+
+        // Take the binary semaphore
+        if (xSemaphoreTake(xBinarySemaphore, portMAX_DELAY) == pdPASS) {
+            // Task is unblocked when the semaphore is taken
+            printf("Tarefa2: Got the binary semaphore! Processing...\n");
+
+            // Simulate some processing
+            vTaskDelay(500 / portTICK_PERIOD_MS);
+
+            printf("Tarefa2: Processing complete. Releasing binary semaphore.\n");
+
+            // Release the binary semaphore to allow the next synchronization
+            xSemaphoreGive(xBinarySemaphore);
+        } else {
+            printf("Failed to take binary semaphore.\n");
+        }
+
+        // Simulate some delay before trying to take the semaphore again
+        vTaskDelay(500 / portTICK_PERIOD_MS);
+    }
 }

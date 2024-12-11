@@ -1,6 +1,0 @@
-CMake Error at run_serial_tool.cmake:66 (message):
-  python;;C:/esp-idf/components/esptool_py/esptool/esptool.py;--chip;esp32
-  failed.
-
-
-

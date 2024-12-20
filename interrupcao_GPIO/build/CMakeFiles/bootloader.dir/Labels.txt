@@ -1,0 +1,13 @@
+# Target labels
+ bootloader
+# Source files and their labels
+C:/interrupcao_GPIO/build/CMakeFiles/bootloader
+C:/interrupcao_GPIO/build/CMakeFiles/bootloader.rule
+C:/interrupcao_GPIO/build/CMakeFiles/bootloader-complete.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-build.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-configure.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-download.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-install.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-mkdir.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-patch.rule
+C:/interrupcao_GPIO/build/bootloader-prefix/src/bootloader-stamp/bootloader-update.rule
